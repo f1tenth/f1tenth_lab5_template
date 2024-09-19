@@ -268,8 +268,9 @@ float greatest_real_root(float a, float b, float c, float d, float e)
     }
     //std::cout<<"Max real root:" << max_real_root<<std::endl;
 
-    return max_real_root;
   }
+  
+  return max_real_root;
 }
 
 void updateTransform(vector<Correspondence> &corresponds, Transform &curr_trans)
