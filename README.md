@@ -16,13 +16,32 @@ Follow the instructions in class to run `particle_filter` on the car using the n
 
 ## IV. Pure Pursuit Implementation
 
-We have provided a skeleton for the pure pursuit node. As per usual, test your algorithm first in the simulator before you test it on the car. When you're testing in the simulator, use the groud truth pose provided by the sim as the localization. When you move to the car, use particle filter to provide localization.
+We have provided a skeleton for the pure pursuit node. As per usual, test your algorithm first in the simulator before you test it on the car. When you're testing in the simulator, use the groud truth pose provided by the sim as the localization (`/ego_racecar/odom`). When you move to the car, use particle filter to provide localization.
 
 As shown in the lecture, the curvature of the arc to track
 can be calculated as:
 
-<!-- ![](https://latex.codecogs.com/svg.latex?\gamma=\frac{2|y|}{L^2}) -->
 $$\gamma=\frac{2|y|}{L^2}$$
+
+In the [f1tenth_gym_ros](https://github.com/f1tenth/f1tenth_gym_ros/tree/dev-jazzy) simulator your node drives **two tracks**, and the autograder runs it on both. Set these in `config/sim.yaml` and your laptop run is the autograder's run:
+
+| Track | `map_path` | `sx`, `sy`, `stheta` | Graded run |
+| --- | --- | --- | --- |
+| Levine | `'maps/levine_blocked'` | `-12.0`, `0.0`, `0.0` (the stock start pose) | three laps in a row, counter-clockwise |
+| Spielberg | `'maps/Spielberg'` | `14.59`, `3.92`, `-2.877` | one lap, in the direction of its centerline |
+
+Both maps come with a centerline, so the simulator counts your laps (`/ego_racecar/lap_count`, and a `completed lap N, last lap X s` line in the bridge log). Those lap times are exactly what the autograder reports and what the leaderboard ranks: a lap runs from the finish line back to it, the stretch from the start pose to the line is a run-up, so every lap is a flying lap.
+
+**One node, two tracks.** The autograder starts your node with no parameter file and one parameter, the track it is about to drive:
+
+```bash
+ros2 run pure_pursuit <executable> --ros-args -p track:=levine
+ros2 run pure_pursuit <executable> --ros-args -p track:=spielberg
+```
+
+Your node declares the string parameter `track` (the skeleton already does) and loads the matching waypoints. Tuned values (lookahead, speeds) must be your node's defaults. For Spielberg the simulator ships a centerline and an optimised raceline, `maps/Spielberg_centerline.csv` and `maps/Spielberg_raceline.csv`: you may use either, reshape them, or make your own. Mind that the raceline uses the whole track, walls included.
+
+**Ship your waypoints with your package.** Put your CSV files in `pure_pursuit/waypoints/`; the skeleton's `CMakeLists.txt` installs that folder, and your node finds it with `get_package_share_directory('pure_pursuit')` (Python, `ament_index_python.packages`) or `ament_index_cpp::get_package_share_directory("pure_pursuit")` (C++). A path like `/home/you/sim_ws/...` only exists on your laptop: on the autograder your node would die at start-up.
 
 ## V. Logging Waypoints
 
@@ -38,17 +57,50 @@ Usually, you'll just save the waypoints as `.csv` files with columns such as `[x
 
 To visualize the list of waypoints you have, and to visualize the current waypoint you're picking, you'll need to use the `visualization_msgs` messages and RViz. You can find some information [here](http://wiki.ros.org/rviz/DisplayTypes/Marker).
 
-## VII. Deliverables
+## VII. Deliverables and Submission
 
-- **Deliverable 1**: Submit the map files (levine_2nd.pgm and levine_2nd.yaml) that you've made using `slam_toolbox`.
-- **Deliverable 2**: Commit your pure pursuit package to GitHub. Your commited code should run smoothly in simulation.
-- **Deliverable 3**: Submit a link to a video on YouTube showing the real car following waypoints in Levine hallway. Show a screen recording of rviz. 
+**This lab is done in teams**, the same teams as lab 4. Your team is already formed — you do not create one or invite anyone. **Every member of the team runs the same command**:
+
+```bash
+gh student accept RoboRacer-Class ese-6150 lab-5-pure-pursuit
+```
+
+Whoever runs it first creates the team's shared repository, `ese-6150-lab-5-pure-pursuit-group-<n>`; everyone else gets `Repository already exists` and the same URL. All of you push to that one repository, so **pull before you push**. One submission is the whole team's submission, and every member gets the same grade.
+
+- **Deliverable 1**: Submit the map files in the `map` folder (`levine_2nd.pgm` and `levine_2nd.yaml`) that you've made using `slam_toolbox`.
+- **Deliverable 2**: Commit your `pure_pursuit` package to your team's repository, waypoints included. Your commited code should run smoothly in simulation: three laps of Levine in a row and one lap of Spielberg, without touching a wall. The autograder watches both runs, and the leaderboard keeps your team's fastest lap on each track.
+- **Deliverable 3**: Submit links to two videos in **`SUBMISSION.md`** (YouTube unlisted, or Google Drive shared as **"Anyone with the link can view"**): your pure pursuit in the simulator with your waypoints visualized, and the real car following waypoints in Levine hallway with the particle filter running, including a screen recording of rviz. You may use different parameters (i.e a separate launch file) for the on-car deployment.
+
+### Submitting
+
+You can commit and push your work as often as you need, but a plain push does **not** count as a submission. When your team is ready to submit, any one of you pushes a tag named `submission` — it counts for the whole team, so agree on the commit first:
+
+```bash
+# Make sure you've pulled before or switch branches
+git push                            # your commits
+git tag submission
+git push origin submission          # this triggers the autograder
+```
+
+The autograder builds your package, checks your map, probes your controller and drives it around both tracks in the simulator, then posts your score as a **Release** on your repo (check the Releases page or the commit's status check a few minutes after you tag). To resubmit, move the tag to a new commit:
+
+```bash
+git tag -f submission
+git push --force origin submission
+```
+
+The best scored `submission` push is counted as your team's final submission, and its grade is every member's grade for the lab. The two leaderboards are independent: each keeps your team's fastest clean lap on its track, so you can submit one tuning for Levine and another for Spielberg. You will only have a SLAM map once you have been on the car; submit without it as often as you like, the leaderboards do not ask for it.
+
+**The autograder finds your work by name.** Package `pure_pursuit` with an executable it can start with `ros2 run pure_pursuit <executable>` (the skeleton's `pure_pursuit_node`), taking its pose from `/ego_racecar/odom`, publishing `AckermannDriveStamped` on `/drive`, and reading the `track` parameter. Otherwise, the autograder will not be able to grade your work and your submission may get the wrong grade.
 
 ## VIII: Grading Rubric
-- Compilation: **10** Points
-- Running slam_toolbox and producing a map: **30** Points
-- Running particle_filter: **20** Points
-- Implementing pure pursuit: **20** Points
-- 2x Videos:
+- Compilation: **10** Points (autograded)
+- Running slam_toolbox and producing a map: **10** Points (autograded: `levine_2nd.yaml` and `levine_2nd.pgm` are in the repo and are a valid occupancy map; the TAs look at the map itself)
+- Running particle_filter: **10** Points (TA-graded from the real-car video)
+- Implementing pure pursuit: **50** Points
+  - **20** Points (autograded without the simulator: your node is given the pose of a car standing to the left and to the right of your path, turned to the left and to the right, and half way round a corner, and must steer the right way each time — whatever your path and lookahead)
+  - **20** Points (autograded in simulation: three counter-clockwise laps of `levine_blocked` in a row without touching a wall; a run that ends early earns partial credit for the fraction covered; the fastest of the three laps goes to the leaderboard)
+  - **10** Points (autograded in simulation: one lap of `Spielberg` without touching a wall, with partial credit; the lap time goes to the Spielberg leaderboard)
+- 2x Videos (TA-graded from the links in `SUBMISSION.md`):
   - In-sim **10** Points
   - On-Car **10** Points

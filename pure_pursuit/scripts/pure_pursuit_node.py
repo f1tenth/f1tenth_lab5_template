@@ -14,6 +14,14 @@ class PurePursuit(Node):
     """
     def __init__(self):
         super().__init__('pure_pursuit_node')
+        # The autograder starts this node twice: with track:=levine, then with track:=spielberg
+        self.declare_parameter('track', 'levine')
+        track = self.get_parameter('track').value
+
+        # TODO: load the waypoints of `track` from the package's installed waypoints/ folder:
+        #       os.path.join(get_package_share_directory('pure_pursuit'), 'waypoints', <your csv>)
+        #       (ament_index_python.packages). A path like /home/you/... only exists on your laptop.
+
         # TODO: create ROS subscribers and publishers
 
     def pose_callback(self, pose_msg):

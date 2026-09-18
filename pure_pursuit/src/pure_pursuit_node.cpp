@@ -26,6 +26,14 @@ private:
 public:
     PurePursuit() : Node("pure_pursuit_node")
     {
+        // The autograder starts this node twice: with track:=levine, then with track:=spielberg
+        std::string track = this->declare_parameter<std::string>("track", "levine");
+
+        // TODO: load the waypoints of `track` from the package's installed waypoints/ folder:
+        //       ament_index_cpp::get_package_share_directory("pure_pursuit") + "/waypoints/<your csv>"
+        //       (#include "ament_index_cpp/get_package_share_directory.hpp").
+        //       A path like /home/you/... only exists on your laptop.
+
         // TODO: create ROS subscribers and publishers
     }
 

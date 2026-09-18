@@ -14,6 +14,7 @@ endif()
 foreach(PACKAGE 
   ament_cmake 
   ament_cmake_python
+  ament_index_cpp
   rclcpp
   rclpy 
   geometry_msgs
@@ -39,7 +40,7 @@ include_directories(
 add_executable(pure_pursuit_node src/pure_pursuit_node.cpp)
 
 ament_target_dependencies(pure_pursuit_node 
-  rclcpp geometry_msgs ackermann_msgs nav_msgs sensor_msgs std_msgs visualization_msgs tf2_ros
+  ament_index_cpp rclcpp geometry_msgs ackermann_msgs nav_msgs sensor_msgs std_msgs visualization_msgs tf2_ros
 )
 
 # Install Cpp executables
@@ -54,6 +55,11 @@ ament_python_install_package(${PROJECT_NAME})
 install(PROGRAMS
   scripts/pure_pursuit_node.py
   DESTINATION lib/${PROJECT_NAME}
+)
+
+# Install the waypoint files, so the node finds them wherever the package is built
+install(DIRECTORY waypoints
+  DESTINATION share/${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
