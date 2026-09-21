@@ -57,6 +57,11 @@ install(PROGRAMS
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# Install the launch files: the autograder starts your nodes with them
+install(DIRECTORY launch
+  DESTINATION share/${PROJECT_NAME}
+)
+
 # Install the waypoint files, so the node finds them wherever the package is built
 install(DIRECTORY waypoints
   DESTINATION share/${PROJECT_NAME}

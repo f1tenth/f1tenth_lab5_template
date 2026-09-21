@@ -26,7 +26,7 @@ private:
 public:
     PurePursuit() : Node("pure_pursuit_node")
     {
-        // The autograder starts this node twice: with track:=levine, then with track:=spielberg
+        // launch/levine_launch.py sets track:=levine, launch/spielberg_launch.py track:=spielberg
         std::string track = this->declare_parameter<std::string>("track", "levine");
 
         // TODO: load the waypoints of `track` from the package's installed waypoints/ folder:

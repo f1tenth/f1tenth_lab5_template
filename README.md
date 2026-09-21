@@ -32,14 +32,16 @@ In the [f1tenth_gym_ros](https://github.com/f1tenth/f1tenth_gym_ros/tree/dev-jaz
 
 Both maps come with a centerline, so the simulator counts your laps (`/ego_racecar/lap_count`, and a `completed lap N, last lap X s` line in the bridge log). Those lap times are exactly what the autograder reports and what the leaderboard ranks: a lap runs from the finish line back to it, the stretch from the start pose to the line is a run-up, so every lap is a flying lap.
 
-**One node, two tracks.** The autograder starts your node with no parameter file and one parameter, the track it is about to drive:
+**One launch file per track.** The autograder starts your code with the two launch files in `pure_pursuit/launch/`, and nothing else:
 
 ```bash
-ros2 run pure_pursuit <executable> --ros-args -p track:=levine
-ros2 run pure_pursuit <executable> --ros-args -p track:=spielberg
+ros2 launch pure_pursuit levine_launch.py      # three laps of Levine (and the pose checks)
+ros2 launch pure_pursuit spielberg_launch.py   # one lap of Spielberg
 ```
 
-Your node declares the string parameter `track` (the skeleton already does) and loads the matching waypoints. Tuned values (lookahead, speeds) must be your node's defaults. For Spielberg the simulator ships a centerline and an optimised raceline, `maps/Spielberg_centerline.csv` and `maps/Spielberg_raceline.csv`: you may use either, reshape them, or make your own. Mind that the raceline uses the whole track, walls included.
+Each one is yours to edit: set `EXECUTABLE` to the node you wrote (`pure_pursuit_node.py` for Python, `pure_pursuit_node` for C++), give each track its own parameter values (lookahead, speeds), and start as many nodes as you like, in either language. Start your own nodes only: the autograder runs the simulator. As shipped, each file sets the string parameter `track` (`levine` or `spielberg`), which the skeleton node declares: load the matching waypoints. Without a track's launch file the autograder falls back to `ros2 run pure_pursuit <executable> --ros-args -p track:=<track>` with no parameter file, so tuned values must then be your node's defaults. Line F of your result tells you which way each run was started.
+
+For Spielberg the simulator ships a centerline and an optimised raceline, `maps/Spielberg_centerline.csv` and `maps/Spielberg_raceline.csv`: you may use either, reshape them, or make your own. Mind that the raceline uses the whole track, walls included.
 
 **Ship your waypoints with your package.** Put your CSV files in `pure_pursuit/waypoints/`; the skeleton's `CMakeLists.txt` installs that folder, and your node finds it with `get_package_share_directory('pure_pursuit')` (Python, `ament_index_python.packages`) or `ament_index_cpp::get_package_share_directory("pure_pursuit")` (C++). A path like `/home/you/sim_ws/...` only exists on your laptop: on the autograder your node would die at start-up.
 
@@ -89,9 +91,9 @@ git tag -f submission
 git push --force origin submission
 ```
 
-The best scored `submission` push is counted as your team's final submission, and its grade is every member's grade for the lab. The two leaderboards are independent: each keeps your team's fastest clean lap on its track, so you can submit one tuning for Levine and another for Spielberg. You will only have a SLAM map once you have been on the car; submit without it as often as you like, the leaderboards do not ask for it.
+The best scored `submission` push is counted as your team's final submission, and its grade is every member's grade for the lab. The two leaderboards are independent: each keeps your team's fastest clean lap on its track, and each track has its own launch file, so one submission carries a tuning for Levine and another for Spielberg. You will only have a SLAM map once you have been on the car; submit without it as often as you like, the leaderboards do not ask for it.
 
-**The autograder finds your work by name.** Package `pure_pursuit` with an executable it can start with `ros2 run pure_pursuit <executable>` (the skeleton's `pure_pursuit_node`), taking its pose from `/ego_racecar/odom`, publishing `AckermannDriveStamped` on `/drive`, and reading the `track` parameter. Otherwise, the autograder will not be able to grade your work and your submission may get the wrong grade.
+**The autograder finds your work by name.** Package `pure_pursuit`, launch files `levine_launch.py` and `spielberg_launch.py` (or, without them, an executable it can start with `ros2 run pure_pursuit <executable>`, the skeleton's `pure_pursuit_node`, reading the `track` parameter), taking its pose from `/ego_racecar/odom` and publishing `AckermannDriveStamped` on `/drive`. Otherwise, the autograder will not be able to grade your work and your submission may get the wrong grade.
 
 ## VIII: Grading Rubric
 - Compilation: **10** Points (autograded)
