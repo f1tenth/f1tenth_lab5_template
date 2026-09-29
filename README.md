@@ -65,11 +65,11 @@ To visualize the list of waypoints you have, and to visualize the current waypoi
 gh student accept RoboRacer-Class ese-6150 lab-5-pure-pursuit
 ```
 
-Whoever runs it first creates the team's shared repository, `ese-6150-lab-5-pure-pursuit-group-<n>`; everyone else gets `Repository already exists` and the same URL. All of you push to that one repository, so **pull before you push**. One submission is the whole team's submission, and every member gets the same grade.
+Whoever runs it first creates the team's shared repository, `ese-6150-lab-5-pure-pursuit-group-<n>`; everyone else gets `Repository already exists` and the same URL. All of you push to that one repository, so **pull before you push**. Each submission counts as the whole team's submission, and every member gets the same grade.
 
 - **Deliverable 1**: Submit the map files in the `map` folder (`levine_2nd.pgm` and `levine_2nd.yaml`) that you've made using `slam_toolbox`.
 - **Deliverable 2**: Commit your `pure_pursuit` package to your team's repository, waypoints included. Your commited code should run smoothly in simulation: three laps of Levine in a row and one lap of Spielberg, without touching a wall. The autograder watches both runs, and the leaderboard keeps your team's fastest lap on each track.
-- **Deliverable 3**: Submit links to two videos in **`SUBMISSION.md`** (YouTube unlisted, or Google Drive shared as **"Anyone with the link can view"**): your pure pursuit in the simulator with your waypoints visualized, and the real car following waypoints in Levine hallway with the particle filter running, including a screen recording of rviz. You may use different parameters (i.e a separate launch file) for the on-car deployment.
+- **Deliverable 3**: Submit links to two videos in **`SUBMISSION.md`** (YouTube unlisted, or Google Drive shared as **"Anyone with the link can view"**): your pure pursuit in the simulator with your waypoints visualized, and the real car following waypoints in Levine hallway with the particle filter running, including a screen recording of foxglove/rviz. You may use different parameters (i.e a separate launch file) for the on-car deployment.
 
 ### Submitting
 
@@ -89,18 +89,18 @@ git tag -f submission
 git push --force origin submission
 ```
 
-The best scored `submission` push is counted as your team's final submission, and its grade is every member's grade for the lab. The two leaderboards are independent: each keeps your team's fastest clean lap on its track, and each track has its own launch file, so one submission carries a tuning for Levine and another for Spielberg. You will only have a SLAM map once you have been on the car; submit without it as often as you like, the leaderboards do not ask for it.
+The best scored `submission` push is counted as your team's final submission, and its grade is every member's grade for the lab. The two leaderboards are independent: each keeps your team's fastest clean lap on its track, and each track has its own launch file, so one submission carries a tuning for Levine and another for Spielberg. You will only need a SLAM map when you deploy on the car; submit without it as often as you need, this is not used for the leaderboard.
 
-**The autograder finds your work by name.** Package `pure_pursuit`, launch files `levine_launch.py` and `spielberg_launch.py` (or, without them, an executable it can start with `ros2 run pure_pursuit <executable>`, the skeleton's `pure_pursuit_node`, reading the `track` parameter), taking its pose from `/ego_racecar/odom` and publishing `AckermannDriveStamped` on `/drive`. Otherwise, the autograder will not be able to grade your work and your submission may get the wrong grade.
+**The autograder finds your work by name.** Package `pure_pursuit`, launch files `levine_launch.py` and `spielberg_launch.py`, subscribing to the pose from `/ego_racecar/odom` and publishing `AckermannDriveStamped` on `/drive`. Otherwise, the autograder will not be able to grade your work and your submission may get the wrong grade.
 
-**Only the topics the lab needs.** Your nodes may read the simulator's localisation (`/ego_racecar/odom`, `/tf`), `/scan` and `/initialpose`, and publish on `/drive`, `/tf` and topics only your own nodes use (path and waypoint markers). The autograder watches the ROS graph while your code runs: a node that reads the lap counter or the collision flag, or publishes on a topic the simulator or the autograder listens to (`/initialpose`, which teleports the car, `/ego_racecar/odom`, the lap counter, ...) gets every line that ran your code scored 0.
+**Only the topics the lab needs.** Your nodes may read the simulator's localization (`/ego_racecar/odom`, `/tf`), `/scan` and `/initialpose`, and publish on `/drive`. The autograder watches the ROS graph while your code runs: a node that reads the lap counter or the collision flag, or publishes on a topic the simulator or the autograder listens to (`/initialpose`, which teleports the car, `/ego_racecar/odom`, the lap counter, ...) gets a 0.
 
 ## VIII: Grading Rubric
 - Compilation: **10** Points (autograded)
-- Running slam_toolbox and producing a map: **10** Points (autograded: `levine_2nd.yaml` and `levine_2nd.pgm` are in the repo and are a valid occupancy map; the TAs look at the map itself)
+- Running slam_toolbox and producing a map: **10** Points (autograded: `levine_2nd.yaml` and `levine_2nd.pgm` are in the repo and are a valid occupancy map; the TAs will check the map)
 - Running particle_filter: **10** Points (TA-graded from the real-car video)
 - Implementing pure pursuit: **50** Points
-  - **20** Points (autograded without the simulator: your node is given the pose of a car standing to the left and to the right of your path, turned to the left and to the right, and half way round a corner, and must steer the right way each time — whatever your path and lookahead)
+  - **20** Points (autograded: your node is given a few fixed poses and is checked that it steers the right way each time regardless of your path and lookahead)
   - **20** Points (autograded in simulation: three counter-clockwise laps of `levine_blocked` in a row without touching a wall; a run that ends early earns partial credit for the fraction covered; the fastest of the three laps goes to the leaderboard)
   - **10** Points (autograded in simulation: one lap of `Spielberg` without touching a wall, with partial credit; the lap time goes to the Spielberg leaderboard)
 - 2x Videos (TA-graded from the links in `SUBMISSION.md`):
