@@ -23,27 +23,25 @@ can be calculated as:
 
 $$\gamma=\frac{2|y|}{L^2}$$
 
-In the [f1tenth_gym_ros](https://github.com/f1tenth/f1tenth_gym_ros/tree/dev-jazzy) simulator your node drives **two tracks**, and the autograder runs it on both. Set these in `config/sim.yaml` and your laptop run is the autograder's run:
+You can test out your node in the [f1tenth_gym_ros](https://github.com/f1tenth/f1tenth_gym_ros/tree/dev-jazzy) simulator on the **two tracks** that we will use in the autograder. To do so, you can set the map in `config/sim.yaml` accordingly:
 
 | Track | `map_path` | `sx`, `sy`, `stheta` | Graded run |
 | --- | --- | --- | --- |
 | Levine | `'maps/levine_blocked'` | `-12.0`, `0.0`, `0.0` (the stock start pose) | three laps in a row, counter-clockwise |
 | Spielberg | `'maps/Spielberg'` | `14.59`, `3.92`, `-2.877` | one lap, in the direction of its centerline |
 
-Both maps come with a centerline, so the simulator counts your laps (`/ego_racecar/lap_count`, and a `completed lap N, last lap X s` line in the bridge log). Those lap times are exactly what the autograder reports and what the leaderboard ranks: a lap runs from the finish line back to it, the stretch from the start pose to the line is a run-up, so every lap is a flying lap.
+Both maps come with a centerline. You can check your lap count and lap time using the `/ego_racecar/lap_count` topic and the `completed lap N, last lap X s` line in the bridge log respectively. These lap times are what we check with the autograder.
 
-**One launch file per track.** The autograder starts your code with the two launch files in `pure_pursuit/launch/`, and nothing else:
+**One launch file per track.** The autograder tests your code using the two launch files in the `pure_pursuit/launch/` folder:
 
 ```bash
 ros2 launch pure_pursuit levine_launch.py      # three laps of Levine (and the pose checks)
 ros2 launch pure_pursuit spielberg_launch.py   # one lap of Spielberg
 ```
 
-Each one is yours to edit: set `EXECUTABLE` to the node you wrote (`pure_pursuit_node.py` for Python, `pure_pursuit_node` for C++), give each track its own parameter values (lookahead, speeds), and start as many nodes as you like, in either language. Start your own nodes only: the autograder runs the simulator. As shipped, each file sets the string parameter `track` (`levine` or `spielberg`), which the skeleton node declares: load the matching waypoints. Without a track's launch file the autograder falls back to `ros2 run pure_pursuit <executable> --ros-args -p track:=<track>` with no parameter file, so tuned values must then be your node's defaults. Line F of your result tells you which way each run was started.
+You can edit these launch files for your specific setup; i.e: set `EXECUTABLE` to the node you wrote (`pure_pursuit_node.py` for Python, `pure_pursuit_node` for C++). For Spielberg the simulator ships a centerline and an optimised raceline, `maps/Spielberg_centerline.csv` and `maps/Spielberg_raceline.csv`: you may use either, reshape them, or make your own.
 
-For Spielberg the simulator ships a centerline and an optimised raceline, `maps/Spielberg_centerline.csv` and `maps/Spielberg_raceline.csv`: you may use either, reshape them, or make your own. Mind that the raceline uses the whole track, walls included.
-
-**Ship your waypoints with your package.** Put your CSV files in `pure_pursuit/waypoints/`; the skeleton's `CMakeLists.txt` installs that folder, and your node finds it with `get_package_share_directory('pure_pursuit')` (Python, `ament_index_python.packages`) or `ament_index_cpp::get_package_share_directory("pure_pursuit")` (C++). A path like `/home/you/sim_ws/...` only exists on your laptop: on the autograder your node would die at start-up.
+**Ship your waypoints with your package.** Put your CSV files in `pure_pursuit/waypoints/`; the skeleton's `CMakeLists.txt` installs that folder by default. To get the CSV file from your node, use  `get_package_share_directory('pure_pursuit')` (Python, `ament_index_python.packages`) or `ament_index_cpp::get_package_share_directory("pure_pursuit")` (C++) so you can fetch the installed files. A path like `/home/you/sim_ws/...` only exists on your machine, so when the autograder runs your node, it would die at start-up because the absolute path is not the same as the autograder's workspace.
 
 ## V. Logging Waypoints
 
