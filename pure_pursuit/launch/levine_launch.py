@@ -1,11 +1,10 @@
-"""What the autograder runs on Levine (levine_blocked, three laps):
+"""This is the launch file used by the autograder to run on Levine (levine_blocked, three laps):
 
     ros2 launch pure_pursuit levine_launch.py
 
-Everything this track needs goes here: one node or several, Python or C++,
-the waypoints to follow and the parameter values that suit this track
-(spielberg_launch.py is Spielberg's). Start your own nodes only: the
-simulator is already running.
+Use this to launch the nodes you need for your pure-pursuit implementation and pass in any parameters specified
+for this track (spielberg_launch.py is Spielberg's). Do NOT run the simulator here as the autograder will 
+launch it separately
 """
 from launch import LaunchDescription
 from launch_ros.actions import Node
